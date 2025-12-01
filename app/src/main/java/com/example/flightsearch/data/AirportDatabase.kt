@@ -1,0 +1,26 @@
+package com.example.flightsearch.data
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+
+@Database(entities = [Airport::class, FavoriteAirports::class], version = 1, exportSchema = true)
+abstract class AirportDatabase : RoomDatabase(){
+    abstract fun airportDAO(): AirportDAO
+    abstract fun favoriteAirportsDAO(): FavoriteAirportsDAO
+
+    companion object {
+        @Volatile
+        private var Instance: AirportDatabase? = null
+
+        fun getDatabase(context: Context): AirportDatabase {
+            return Instance ?: synchronized(this) {
+                Room.databaseBuilder(context, AirportDatabase::class.java, "airport_database")
+                    .createFromAsset("database/flight_search.db")
+                    .build()
+                    .also { Instance = it }
+            }
+        }
+    }
+}

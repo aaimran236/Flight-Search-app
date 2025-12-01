@@ -35,6 +35,6 @@ interface FavoriteAirportsDAO {
         ON favorite.destination_code = destination.iata_code
     """
     )
-    fun getFavoriteRouteInfo(): Flow<List<Route>>
+    fun getFavoriteRoutes(): Flow<List<Route>>
 
 }
