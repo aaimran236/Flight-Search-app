@@ -6,13 +6,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
-interface FavoriteAirportsDAO {
+interface FavoriteAirportDAO {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(favoriteAirports: FavoriteAirports)
+    suspend fun insert(favoriteAirport: FavoriteAirport)
 
     @Delete
-    suspend fun delete(favoriteAirports: FavoriteAirports)
+    suspend fun delete(favoriteAirport: FavoriteAirport)
 
     /*
     Triple quotes create a Raw String. This allows you to:

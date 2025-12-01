@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "favorite")
-data class FavoriteAirports (
+data class FavoriteAirport (
     @PrimaryKey(autoGenerate = true)
     val id: Int=0,
 
