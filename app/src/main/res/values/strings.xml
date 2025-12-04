@@ -1,4 +1,8 @@
 <resources>
+
     <string name="app_name">Flight Search</string>
     <string name="search_flight">Enter Departure Airport</string>
+    <string name="departure">DEPART</string>
+    <string name="destination">ARRIVE</string>
+
 </resources>

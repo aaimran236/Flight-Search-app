@@ -1,9 +1,13 @@
 package com.example.flightsearch.ui.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,6 +32,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.flightsearch.R
 import com.example.flightsearch.data.AirportInfo
 import com.example.flightsearch.ui.AppViewModelProvider
+import com.example.flightsearch.ui.allPossibleFlights
 
 @Composable
 fun HomeScreen(
@@ -44,38 +51,58 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.suggestionUiState.collectAsState()
     val searchTerm by viewModel.searchQuery.collectAsState()
+    val resultUiState = viewModel.resultUiState
+    ///val flightsUiState by viewModel.availableFlightsUiState.collectAsState()
+    val availableFlightList by viewModel.getListOfAvailableFlights().collectAsState(emptyList())
 
     Scaffold(
         topBar = {
             FlightSearchTopAppBar()
         }
     ) { innerPadding ->
-        searchFlight(
-            searchText = searchTerm,
-            onValueChange = viewModel::onQueryChanged,
-            suggestions = uiState.suggestionList,
-            contentPadding = innerPadding
-        )
+
+        Column(
+            modifier= Modifier.fillMaxSize()
+                .padding( innerPadding)
+        ) {
+            searchFlight(
+                searchText = searchTerm,
+                onValueChange = viewModel::onQueryChanged,
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            if (resultUiState.isDepartureSelected){
+                allPossibleFlights(
+                    departureInfo = resultUiState.airportInfo,
+                    availableFlights = availableFlightList,
+                    //TODO: pass save favorite button onclick
+                    onFavoriteClick = {}
+                )
+            }else{
+                FlightSuggestions(
+                    onSuggestionClick={iataCode,name->
+                        viewModel.updateResultUi(iataCode,name)
+                    },
+                    suggestions = uiState.suggestionList,
+                )
+            }
+        }
     }
 }
+
 
 @Composable
 fun searchFlight(
     searchText: String,
     onValueChange:(String)-> Unit,
-    suggestions: List<AirportInfo>,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
 ){
-    Column(modifier = Modifier.padding(contentPadding) ) {
+    Column() {
         OutlinedTextField(
             value = searchText,
             onValueChange=onValueChange,
             placeholder = { Text(stringResource(R.string.search_flight)) },
-//        colors = OutlinedTextFieldDefaults.colors(
-//            focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-//            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-//            disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-//        ),
+
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
@@ -96,45 +123,51 @@ fun searchFlight(
                 disabledIndicatorColor = Color.Transparent
             )
         )
+    }
+}
 
-        Spacer(Modifier.height(10.dp))
+@Composable
+fun FlightSuggestions(
+    suggestions: List<AirportInfo>,
+    onSuggestionClick:(String, String)-> Unit,
 
-        LazyColumn(
-            modifier = Modifier.padding(horizontal = 2.dp)
-        ) {
-            items(suggestions, key = { it.iataCode }) {
-                    suggestion->
-                FlightSuggestion(
-                    suggestion=suggestion,
-                    modifier=Modifier
-                        .fillMaxWidth()
-                )
-            }
+){
+    LazyColumn(
+    ) {
+        items(suggestions, key = { it.iataCode }) {
+                suggestion->
+            FlightSuggestionItem(
+                suggestion=suggestion,
+                modifier=Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onSuggestionClick(suggestion.iataCode,suggestion.fullAirportName)
+                    },
+
+            )
         }
     }
 }
 
 @Composable
-fun FlightSuggestion(
+fun FlightSuggestionItem(
     suggestion: AirportInfo,
-    modifier: Modifier= Modifier
+    modifier: Modifier= Modifier,
 ){
     Row(
         modifier = modifier
-            .padding(vertical = 5.dp, horizontal = 16.dp),
+            .padding(vertical = 5.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = suggestion.iataCode,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
-
-            ///modifier = Modifier.width(40.dp)
         )
         Spacer(Modifier.width(10.dp))
         Text(
             text = suggestion.fullAirportName,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray,
             maxLines = 1, // Truncate if too long
             overflow = TextOverflow.Ellipsis
