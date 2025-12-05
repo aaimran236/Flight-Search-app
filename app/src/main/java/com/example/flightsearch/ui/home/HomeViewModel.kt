@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.flightsearch.data.AirportInfo
 import com.example.flightsearch.data.AirportRepository
+import com.example.flightsearch.data.FavoriteAirport
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class HomeViewModel(val airportRepository: AirportRepository) : ViewModel() {
 
@@ -59,20 +61,34 @@ class HomeViewModel(val airportRepository: AirportRepository) : ViewModel() {
 //                initialValue = AvailableFlightsUiState()
 //            )
 
-    fun getListOfAvailableFlights(iataCode: String = resultUiState.airportInfo.iataCode): Flow<List<AirportInfo>> =
+    fun getListOfAvailableFlights(iataCode: String = resultUiState.departureInfo.iataCode): Flow<List<AirportInfo>> =
         airportRepository.getFlightsByDeparture(iataCode)
 
-    fun updateResultUi(departureIATA: String, departureName: String) {
+    fun updateDeparture(departureIATA: String, departureName: String) {
         onQueryChanged(departureIATA)
 
         resultUiState= resultUiState.copy(
-            airportInfo = AirportInfo(departureIATA,departureName),
+            departureInfo = AirportInfo(departureIATA,departureName),
             isDepartureSelected = true)
     }
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }
+
+    fun addToFavorites(destinationIATACode: String) {
+
+        val favoriteAirport =
+            FavoriteAirport(
+                departureIATACode = resultUiState.departureInfo.iataCode,
+                destinationIATACode = destinationIATACode
+            )
+
+        viewModelScope.launch {
+            airportRepository.insertFavorite(favoriteAirport)
+        }
+    }
+
 }
 
 data class SuggestionUiState(
@@ -84,6 +100,6 @@ data class SuggestionUiState(
 //)
 
 data class ResultUiState(
-    val airportInfo: AirportInfo= AirportInfo("",""),
-    val isDepartureSelected: Boolean = false
+    val departureInfo: AirportInfo= AirportInfo("",""),
+    val isDepartureSelected: Boolean = false,
 )

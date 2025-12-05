@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface FavoriteAirportDAO {
 
+    // IGNORE: If the pair exists, do nothing.
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(favoriteAirport: FavoriteAirport)
 

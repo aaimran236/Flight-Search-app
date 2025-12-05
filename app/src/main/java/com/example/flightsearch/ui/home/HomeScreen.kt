@@ -29,6 +29,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,8 +42,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.flightsearch.R
 import com.example.flightsearch.data.AirportInfo
+import com.example.flightsearch.data.FavoriteAirport
 import com.example.flightsearch.ui.AppViewModelProvider
 import com.example.flightsearch.ui.allPossibleFlights
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -55,6 +58,7 @@ fun HomeScreen(
     ///val flightsUiState by viewModel.availableFlightsUiState.collectAsState()
     val availableFlightList by viewModel.getListOfAvailableFlights().collectAsState(emptyList())
 
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             FlightSearchTopAppBar()
@@ -74,15 +78,18 @@ fun HomeScreen(
 
             if (resultUiState.isDepartureSelected){
                 allPossibleFlights(
-                    departureInfo = resultUiState.airportInfo,
+                    departureInfo = resultUiState.departureInfo,
                     availableFlights = availableFlightList,
-                    //TODO: pass save favorite button onclick
-                    onFavoriteClick = {}
+
+                    onFavoriteClick = viewModel::addToFavorites,
+
+                    title = "Flight from ${resultUiState.departureInfo.iataCode}",
+                    isFavorite = false
                 )
             }else{
                 FlightSuggestions(
                     onSuggestionClick={iataCode,name->
-                        viewModel.updateResultUi(iataCode,name)
+                        viewModel.updateDeparture(iataCode,name)
                     },
                     suggestions = uiState.suggestionList,
                 )

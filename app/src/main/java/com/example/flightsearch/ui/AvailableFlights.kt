@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,12 +35,13 @@ import com.example.flightsearch.R
 import com.example.flightsearch.data.AirportInfo
 
 @Composable
-fun  allPossibleFlights(
-    modifier: Modifier=Modifier,
+fun allPossibleFlights(
+    modifier: Modifier = Modifier,
     departureInfo: AirportInfo,
     availableFlights: List<AirportInfo>,
-    onFavoriteClick:()-> Unit,
-    ///TODO: add isFavorite: Boolean
+    onFavoriteClick: (String) -> Unit,
+    title: String,
+    isFavorite: Boolean
 ) {
     Column(
         modifier= Modifier
@@ -52,7 +52,7 @@ fun  allPossibleFlights(
             .fillMaxSize(),
     ){
         Text(
-            text="Flight from ${departureInfo.iataCode}",
+            text=title,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
         )
@@ -66,23 +66,25 @@ fun  allPossibleFlights(
                     destination = flight,
                     modifier=Modifier.fillMaxWidth(),
                     onFavoriteClick=onFavoriteClick,
-
+                    isFavorite=isFavorite
                 )
             }
         }
     }
 }
 
+
 @Composable
 fun flightItem(
     departure: AirportInfo,
     destination: AirportInfo,
-    modifier: Modifier=Modifier,
-    onFavoriteClick:()->Unit,
-    isFavorite: Boolean=true
-){
+    modifier: Modifier = Modifier,
+    onFavoriteClick: (String) -> Unit,
+    isFavorite: Boolean
+) {
     Card(
-        shape = RoundedCornerShape(topStart = 0.dp,
+        shape = RoundedCornerShape(
+            topStart = 0.dp,
             topEnd = 20.dp, // Only this one is rounded
             bottomEnd = 0.dp,
             bottomStart = 0.dp
@@ -116,9 +118,7 @@ fun flightItem(
                 )
             }
 
-            IconButton(onClick = onFavoriteClick,
-                enabled = false,
-                modifier= Modifier.fillMaxHeight()) {
+            IconButton(onClick = {onFavoriteClick(destination.iataCode)}) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
                     contentDescription = "Favorite",
@@ -145,13 +145,14 @@ fun routeInfo(
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold,
         )
+
         Spacer(Modifier.width(5.dp))
+
         Text(
             text = route.fullAirportName,
             style = MaterialTheme.typography.bodySmall,
             color = Color.Gray,
             maxLines = 1,
-            ///overflow = TextOverflow.Ellipsis
         )
     }
 }
