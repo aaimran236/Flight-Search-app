@@ -66,7 +66,8 @@ fun allPossibleFlights(
                     destination = flight,
                     modifier=Modifier.fillMaxWidth(),
                     onFavoriteClick=onFavoriteClick,
-                    isFavorite=isFavorite
+                    isFavorite=isFavorite,
+                    onRemoveClick = {}
                 )
             }
         }
@@ -76,10 +77,12 @@ fun allPossibleFlights(
 
 @Composable
 fun flightItem(
+    id: Int=0,
     departure: AirportInfo,
     destination: AirportInfo,
     modifier: Modifier = Modifier,
     onFavoriteClick: (String) -> Unit,
+    onRemoveClick:(Int)->Unit,
     isFavorite: Boolean
 ) {
     Card(
@@ -118,7 +121,13 @@ fun flightItem(
                 )
             }
 
-            IconButton(onClick = {onFavoriteClick(destination.iataCode)}) {
+            IconButton(onClick = {
+                if (isFavorite) {
+                    onRemoveClick(id)
+                } else {
+                    onFavoriteClick(destination.iataCode)
+                }
+            }) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
                     contentDescription = "Favorite",

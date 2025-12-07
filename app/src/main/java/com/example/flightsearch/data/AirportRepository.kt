@@ -9,7 +9,7 @@ interface AirportRepository {
 
     suspend fun insertFavorite(favoriteAirport: FavoriteAirport)
 
-    suspend fun deleteFavorite(favoriteAirport: FavoriteAirport)
+    suspend fun deleteFromFavorite(id: Int)
 
     fun getFavoriteRouteList(): Flow<List<Route>>
 }

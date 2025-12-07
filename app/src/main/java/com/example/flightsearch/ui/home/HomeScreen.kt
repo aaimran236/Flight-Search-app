@@ -2,11 +2,8 @@ package com.example.flightsearch.ui.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,8 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,10 +37,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.flightsearch.R
 import com.example.flightsearch.data.AirportInfo
-import com.example.flightsearch.data.FavoriteAirport
 import com.example.flightsearch.ui.AppViewModelProvider
+import com.example.flightsearch.ui.FavoriteRoutes
 import com.example.flightsearch.ui.allPossibleFlights
-import kotlinx.coroutines.launch
+
 
 @Composable
 fun HomeScreen(
@@ -56,7 +51,8 @@ fun HomeScreen(
     val searchTerm by viewModel.searchQuery.collectAsState()
     val resultUiState = viewModel.resultUiState
     ///val flightsUiState by viewModel.availableFlightsUiState.collectAsState()
-    val availableFlightList by viewModel.getListOfAvailableFlights().collectAsState(emptyList())
+    ///val availableFlightList by viewModel.getListOfAvailableFlights().collectAsState(emptyList())
+    val favoriteRouteUiState by viewModel.favoriteRouteUiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
@@ -77,6 +73,7 @@ fun HomeScreen(
             Spacer(Modifier.height(10.dp))
 
             if (resultUiState.isDepartureSelected){
+                val availableFlightList by viewModel.getListOfAvailableFlights().collectAsState(emptyList())
                 allPossibleFlights(
                     departureInfo = resultUiState.departureInfo,
                     availableFlights = availableFlightList,
@@ -87,12 +84,21 @@ fun HomeScreen(
                     isFavorite = false
                 )
             }else{
-                FlightSuggestions(
-                    onSuggestionClick={iataCode,name->
-                        viewModel.updateDeparture(iataCode,name)
-                    },
-                    suggestions = uiState.suggestionList,
-                )
+                if (searchTerm.isEmpty() && favoriteRouteUiState.routeList.isNotEmpty()){
+                    FavoriteRoutes(
+                        title = stringResource(R.string.favorite_routes),
+                        favoriteRouteLIst = favoriteRouteUiState.routeList,
+                        onRemoveClick = viewModel::removeFromFavorites,
+                        isFavorite = true
+                    )
+                }else{
+                    FlightSuggestions(
+                        onSuggestionClick={iataCode,name->
+                            viewModel.updateDeparture(iataCode,name)
+                        },
+                        suggestions = uiState.suggestionList,
+                    )
+                }
             }
         }
     }

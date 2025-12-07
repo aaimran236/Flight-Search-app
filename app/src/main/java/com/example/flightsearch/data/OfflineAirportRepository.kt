@@ -16,8 +16,8 @@ class OfflineAirportRepository(
     override suspend fun insertFavorite(favoriteAirport: FavoriteAirport) =
         favoriteAirportDAO.insert(favoriteAirport = favoriteAirport)
 
-    override suspend fun deleteFavorite(favoriteAirport: FavoriteAirport) =
-        favoriteAirportDAO.delete(favoriteAirport = favoriteAirport)
+    override suspend fun deleteFromFavorite(id: Int)=
+        favoriteAirportDAO.deleteByID(id=id)
 
     override fun getFavoriteRouteList(): Flow<List<Route>> =
         favoriteAirportDAO.getFavoriteRoutes()

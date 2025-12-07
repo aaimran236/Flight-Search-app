@@ -13,14 +13,20 @@ interface FavoriteAirportDAO {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(favoriteAirport: FavoriteAirport)
 
-    @Delete
-    suspend fun delete(favoriteAirport: FavoriteAirport)
-
     /*
     Triple quotes create a Raw String. This allows you to:
     Write your SQL query over multiple lines so it is easy to read.
     Avoid "escaping" special characters.
      */
+
+    @Query(
+        """
+            DELETE
+            FROM favorite 
+                WHERE id=:id
+    """
+    )
+    suspend fun deleteByID(id: Int)
 
     @Query(
         """

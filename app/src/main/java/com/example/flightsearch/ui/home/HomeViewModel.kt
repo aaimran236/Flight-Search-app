@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.flightsearch.data.AirportInfo
 import com.example.flightsearch.data.AirportRepository
 import com.example.flightsearch.data.FavoriteAirport
+import com.example.flightsearch.data.Route
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,6 +65,15 @@ class HomeViewModel(val airportRepository: AirportRepository) : ViewModel() {
     fun getListOfAvailableFlights(iataCode: String = resultUiState.departureInfo.iataCode): Flow<List<AirportInfo>> =
         airportRepository.getFlightsByDeparture(iataCode)
 
+    val favoriteRouteUiState : StateFlow<FavoriteRouteUiState> =
+        airportRepository.getFavoriteRouteList()
+            .map { FavoriteRouteUiState(it) }
+            .stateIn(
+                scope=viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = FavoriteRouteUiState()
+            )
+
     fun updateDeparture(departureIATA: String, departureName: String) {
         onQueryChanged(departureIATA)
 
@@ -72,9 +82,6 @@ class HomeViewModel(val airportRepository: AirportRepository) : ViewModel() {
             isDepartureSelected = true)
     }
 
-    companion object {
-        private const val TIMEOUT_MILLIS = 5_000L
-    }
 
     fun addToFavorites(destinationIATACode: String) {
 
@@ -89,6 +96,16 @@ class HomeViewModel(val airportRepository: AirportRepository) : ViewModel() {
         }
     }
 
+    fun removeFromFavorites(favoriteId: Int){
+        viewModelScope.launch {
+            airportRepository.deleteFromFavorite(id=favoriteId)
+        }
+    }
+
+    companion object {
+        private const val TIMEOUT_MILLIS = 5_000L
+    }
+
 }
 
 data class SuggestionUiState(
@@ -98,6 +115,10 @@ data class SuggestionUiState(
 //data class AvailableFlightsUiState(
 //    val availableFlights: List<AirportInfo> = emptyList(),
 //)
+
+data class FavoriteRouteUiState(
+    val routeList: List<Route> =emptyList()
+)
 
 data class ResultUiState(
     val departureInfo: AirportInfo= AirportInfo("",""),
