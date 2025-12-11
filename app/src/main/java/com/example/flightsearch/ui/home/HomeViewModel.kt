@@ -10,30 +10,48 @@ import com.example.flightsearch.data.AirportInfo
 import com.example.flightsearch.data.AirportRepository
 import com.example.flightsearch.data.FavoriteAirport
 import com.example.flightsearch.data.Route
+import com.example.flightsearch.data.UserSearchRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class HomeViewModel(val airportRepository: AirportRepository) : ViewModel() {
+class HomeViewModel(
+    private val airportRepository: AirportRepository,
+    private val userSearchRepository: UserSearchRepository
+) : ViewModel() {
 
     private val _queryFlow = MutableStateFlow("")
     val searchQuery=_queryFlow.asStateFlow()
+    var resultUiState by mutableStateOf(ResultUiState())
+        private set
 
-     var resultUiState by mutableStateOf(ResultUiState())
-         private set
+    init {
+        viewModelScope.launch {
+            val savedSearched=userSearchRepository.searchedText.first()
+            if (savedSearched.isNotEmpty()){
+                onQueryChanged(savedSearched)
+            }
+        }
+    }
 
     fun onQueryChanged(query: String) {
         resultUiState= resultUiState.copy(isDepartureSelected = false)
         _queryFlow.value = query
+        viewModelScope.launch {
+            userSearchRepository.saveSearchedText(query)
+        }
     }
+
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val suggestionUiState: StateFlow<SuggestionUiState> =

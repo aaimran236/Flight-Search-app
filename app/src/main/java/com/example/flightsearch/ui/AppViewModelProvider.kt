@@ -11,7 +11,10 @@ import com.example.flightsearch.ui.home.HomeViewModel
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            HomeViewModel(inventoryApplication().container.airportRepository)
+            HomeViewModel(
+                inventoryApplication().container.airportRepository,
+                inventoryApplication().userSearchRepository
+            )
         }
     }
 }

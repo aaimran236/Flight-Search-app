@@ -55,9 +55,10 @@ fun allPossibleFlights(
             text=title,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
+            modifier=Modifier.padding(start = 5.dp)
         )
 
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(15.dp))
 
         LazyColumn() {
             items(availableFlights, key = { it.iataCode }) { flight ->
@@ -114,7 +115,7 @@ fun flightItem(
                     label = stringResource(R.string.departure),
                     route = departure
                 )
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(7.dp))
                 routeInfo(
                     label = stringResource(R.string.destination),
                     route = destination
@@ -131,7 +132,8 @@ fun flightItem(
                 Icon(
                     imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
                     contentDescription = "Favorite",
-                    tint = if (isFavorite) Color(0xFFD4AF37) else Color.Gray // Gold if favorite
+                    modifier= Modifier.size(30.dp),
+                    tint = if (isFavorite) Color(0xFF944B00) else Color.Gray // Gold if favorite
                 )
             }
         }

@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.flightsearch.data.AirportInfo
-import com.example.flightsearch.data.FavoriteAirport
 import com.example.flightsearch.data.Route
 
 @Composable
@@ -38,9 +37,10 @@ fun FavoriteRoutes(
             text = title,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
+            modifier=Modifier.padding(start = 5.dp)
         )
 
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(15.dp))
 
         LazyColumn() {
             items(favoriteRouteLIst, key = { it.id }) { route ->
